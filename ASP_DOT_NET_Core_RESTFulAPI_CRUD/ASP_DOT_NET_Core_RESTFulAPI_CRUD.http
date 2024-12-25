@@ -1,0 +1,6 @@
+@ASP_DOT_NET_Core_RESTFulAPI_CRUD_HostAddress = http://localhost:5162
+
+GET {{ASP_DOT_NET_Core_RESTFulAPI_CRUD_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
