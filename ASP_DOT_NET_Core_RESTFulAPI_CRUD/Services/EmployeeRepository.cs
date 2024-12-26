@@ -1,4 +1,6 @@
 ﻿using Dapper;
+using Microsoft.Data.SqlClient;
+using Serilog;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
@@ -11,10 +13,10 @@ namespace ASP_DOT_NET_Core_RESTFulAPI_CRUD.Services
         private readonly DapperDbContext _dbContext;
         public EmployeeRepository(DapperDbContext dbContext)
         {
-            _dbContext=dbContext;
+            _dbContext = dbContext;
         }
         private const string StoredProcedureName = "sp_ManageEmpInfo";
-        
+
         // Fetch all employees or a specific employee by ID
         public async Task<IEnumerable<EmployeeInfo>> GetAllEmployeesAsync(int? empId = null)
         {
@@ -36,31 +38,48 @@ namespace ASP_DOT_NET_Core_RESTFulAPI_CRUD.Services
         // Insert a new employee
         public async Task<int> AddEmployeeAsync(EmployeeInfo employee)
         {
-            using (var connection = _dbContext.CreateConnection())
+            try
             {
-                var parameters = new DynamicParameters();
-                parameters.Add("@Action", "INSERT", DbType.String);
-                parameters.Add("@FirstName", employee.FirstName, DbType.String);
-                parameters.Add("@LastName", employee.LastName, DbType.String);
-                parameters.Add("@Email", employee.Email, DbType.String);
-                parameters.Add("@PhoneNumber", employee.PhoneNumber, DbType.String);
-                parameters.Add("@DateOfBirth", employee.DateOfBirth, DbType.Date);
-                parameters.Add("@HireDate", employee.HireDate, DbType.Date);
-                parameters.Add("@JobTitle", employee.JobTitle, DbType.String);
-                parameters.Add("@Department", employee.Department, DbType.String);
-                parameters.Add("@Salary", employee.Salary, DbType.Decimal);
-                parameters.Add("@Address", employee.Address, DbType.String);
-                parameters.Add("@City", employee.City, DbType.String);
-                parameters.Add("@State", employee.State, DbType.String);
-                parameters.Add("@PostalCode", employee.PostalCode, DbType.String);
-                parameters.Add("@Country", employee.Country, DbType.String);
-                parameters.Add("@IsActive", employee.IsActive, DbType.Boolean);
+                using (var connection = _dbContext.CreateConnection())
+                {
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@Action", "INSERT", DbType.String);
+                    parameters.Add("@FirstName", employee.FirstName, DbType.String);
+                    parameters.Add("@LastName", employee.LastName, DbType.String);
+                    parameters.Add("@Email", employee.Email, DbType.String);
+                    parameters.Add("@PhoneNumber", employee.PhoneNumber, DbType.String);
+                    parameters.Add("@DateOfBirth", employee.DateOfBirth, DbType.Date);
+                    parameters.Add("@HireDate", employee.HireDate, DbType.Date);
+                    parameters.Add("@JobTitle", employee.JobTitle, DbType.String);
+                    parameters.Add("@Department", employee.Department, DbType.String);
+                    parameters.Add("@Salary", employee.Salary, DbType.Decimal);
+                    parameters.Add("@Address", employee.Address, DbType.String);
+                    parameters.Add("@City", employee.City, DbType.String);
+                    parameters.Add("@State", employee.State, DbType.String);
+                    parameters.Add("@PostalCode", employee.PostalCode, DbType.String);
+                    parameters.Add("@Country", employee.Country, DbType.String);
+                    parameters.Add("@IsActive", employee.IsActive, DbType.Boolean);
 
-                return await connection.ExecuteAsync(
-                    StoredProcedureName,
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
+                    // Use QuerySingleAsync to fetch the result "QuerySingleAsync"
+                    var InsertedID = await connection.QuerySingleAsync<int>(
+                        StoredProcedureName,
+                        parameters,
+                        commandType: CommandType.StoredProcedure
+                    );
+                    return InsertedID;
+                }
+            }
+            catch (SqlException ex)
+            {
+                Log.Error("SQL Error in AddEmployeeAsync: {Message}. Error Number: {Number}", ex.Message, ex.Number);
+                // Optionally rethrow or return a custom value to handle the exception gracefully.
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("An unexpected error occurred in AddEmployeeAsync: {Message}", ex.Message);
+                // Optionally rethrow or return a custom value to handle the exception gracefully.
+                throw;
             }
         }
         // Update an existing employee

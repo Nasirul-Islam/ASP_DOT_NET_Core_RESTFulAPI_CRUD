@@ -39,10 +39,12 @@ namespace ASP_DOT_NET_Core_RESTFulAPI_CRUD.Controllers
             }
 
             var result = await _employeeRepository.AddEmployeeAsync(employee);
-
+            
+            //if (result != null)
             if (result > 0)
             {
-                return CreatedAtAction(nameof(GetEmployeeById), new { empId = employee.EmpID }, employee);
+                // var res = CreatedAtAction(nameof(GetEmployeeById), new { empId = result }, employee);
+                return Ok(new { message = "Employee inserted successfully." });
             }
 
             return StatusCode(500, "Error occurred while adding the employee.");
@@ -53,17 +55,17 @@ namespace ASP_DOT_NET_Core_RESTFulAPI_CRUD.Controllers
         {
             if (employee == null || empId != employee.EmpID)
             {
-                return BadRequest("Invalid employee data.");
+                return BadRequest(new { message = "Invalid employee data." });
             }
 
             var result = await _employeeRepository.UpdateEmployeeAsync(employee);
 
-            if (result > 0)
+            if (result == -1)
             {
-                return Ok("Employee updated successfully.");
+                return Ok(new { message = "Employee updated successfully." });
             }
 
-            return NotFound("Employee not found.");
+            return NotFound(new { message = "Employee not found." });
         }
         // Delete an employee
         [HttpDelete("{empId}")]
@@ -71,12 +73,12 @@ namespace ASP_DOT_NET_Core_RESTFulAPI_CRUD.Controllers
         {
             var result = await _employeeRepository.DeleteEmployeeAsync(empId);
 
-            if (result > 0)
+            if (result == -1)
             {
-                return Ok("Employee deleted successfully.");
+                return Ok(new { message = "Employee deleted successfully." });
             }
 
-            return NotFound("Employee not found.");
+            return NotFound(new { message = "Employee not found." });
         }
     }
 }
