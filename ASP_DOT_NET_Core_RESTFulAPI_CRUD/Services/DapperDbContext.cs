@@ -10,7 +10,8 @@ namespace ASP_DOT_NET_Core_RESTFulAPI_CRUD.Services
         public DapperDbContext(IConfiguration configuration)
         {
             //_configuration = configuration;
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _connectionString = configuration.GetConnectionString("MSSQLConnection");
+            //_connectionString = configuration.GetConnectionString("DefaultConnection");
         }
         public IDbConnection CreateConnection()
         {
